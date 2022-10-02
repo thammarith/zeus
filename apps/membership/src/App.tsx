@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
-import { Button } from 'ui';
+import Home from './pages/Home/Home';
 
-const App: React.FC = () => {
-    const [count, setCount] = useState(0);
-
-    return (
-        <div className="App">
-            <h1 className="text-3xl font-bold underline font-display">Hello world!</h1>
-            <Button />
-        </div>
-    );
-};
+const App: React.FC = () => <Home />;
 
 export default App;

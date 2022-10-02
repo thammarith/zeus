@@ -3,3 +3,7 @@
 @tailwind utilities;
 
 @import 'ui/styles/font-anuphan.scss';
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
