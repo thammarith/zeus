@@ -1,8 +1,5 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
+// /** @type {import('tailwindcss').Config} */
+// const config = require('tailwind-config/tailwind.config.cjs');
+
+// module.exports = config;
+

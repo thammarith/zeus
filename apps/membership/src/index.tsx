@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider, Route } from 'react-router-dom';
+import 'ui/styles/index.scss';
 
 import App from './App';
 import Account from './pages/Account/Account';

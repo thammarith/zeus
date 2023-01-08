@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+@import 'ui/styles/index.scss';
 @import 'ui/styles/font-anuphan.scss';
 
 *, *::before, *::after {

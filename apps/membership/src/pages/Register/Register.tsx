@@ -1,7 +1,7 @@
-import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik';
+import { Form, Formik, FormikHelpers } from 'formik';
 import React from 'react';
 import { cx } from 'tools';
-import { TextField } from 'ui';
+import { GenericLayout, TextField } from 'ui';
 
 import './Register.scss';
 
@@ -27,10 +27,15 @@ const Register: React.FC = () => {
         if (!isValidPhone && !isValidEmail) return 'อีเมลไม่ถูกต้อง';
     };
 
+    const validatePassword = (value: string) => {
+        if (!value) return validateRequired('รหัสผ่าน')(value);
+        if (value.length < 8) return 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
+    };
+
     const hasErrors = (errors: Object) => Object.keys(errors).length > 0;
 
     return (
-        <main id="Register" className="px-4 pt-24">
+        <GenericLayout id="Register">
             <section className="font-display flex flex-col justify-center">
                 <h1 className="text-4xl font-semibold">
                     สมัครสมาชิก
@@ -70,13 +75,23 @@ const Register: React.FC = () => {
                                 placeholder="ดารกวงศ์"
                                 validate={validateLastName}
                             />
-
+                            {/* 
                             <TextField
                                 label="อีเมลหรือหมายเลขโทรศัพท์"
                                 name="contact"
                                 isError={!!(touched.contact && errors.contact)}
                                 placeholder="ekkapob@astermail.com หรือ 0800000000"
                                 validate={validateContact}
+                            /> */}
+
+                            <TextField
+                                label="รหัสผ่าน"
+                                name="contact"
+                                hintComponent={<>อย่างน้อย 8 ตัวอักษร</>}
+                                type="password"
+                                isError={!!(touched.contact && errors.contact)}
+                                placeholder="รหัสผ่าน"
+                                validate={validatePassword}
                             />
 
                             <button
@@ -95,7 +110,7 @@ const Register: React.FC = () => {
                     )}
                 </Formik>
             </section>
-        </main>
+        </GenericLayout>
     );
 };
 
