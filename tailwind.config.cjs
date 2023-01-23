@@ -1,4 +1,2 @@
-/** @type {import('tailwindcss').Config} */
-const config = require('tailwind-config/tailwind.config.cjs');
-
-module.exports = config;
+// /** @type {import('tailwindcss').Config} */
+module.exports = require('tailwind-config/tailwind.config.cjs')

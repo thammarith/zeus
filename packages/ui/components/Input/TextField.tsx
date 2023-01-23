@@ -4,7 +4,7 @@ import { ComponentWithChildren } from 'tools/index';
 
 import { cx } from 'tools';
 
-import '../../styles/index.scss'
+import '../../styles/styles.css'
 
 interface TextFieldProps {
     className?: string;

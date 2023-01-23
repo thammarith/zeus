@@ -1,6 +1,25 @@
+const path = require('path');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: ['./**/*.{js,ts,jsx,tsx}', '../**/*.{js,ts,jsx,tsx}'],
+    // content: ['./**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}', '../**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+
+    content: {
+        files: [
+            './**/*.{json,md}'
+            // './**/*.{js,ts,jsx,tsx}',
+            // '../**/*.{js,ts,jsx,tsx}',
+            // './packages/ui/**/*.{js,ts,jsx,tsx}',
+            // 'apps/**/*.{js,ts,jsx,tsx,astro}',
+            // './*.{js,ts,jsx,tsx}',
+            // 'src/**/*.{js,ts,jsx,tsx}',
+            // '*/**/components/**/*.{js,ts,jsx,tsx}',
+        ],
+        extract: (content) => {
+            console.log(content)
+            return [content]
+        }
+    },
     theme: {
         fontFamily: {
             display: [
