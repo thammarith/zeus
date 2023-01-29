@@ -1,0 +1,11 @@
+{
+  "name": "tailwind-config",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "files": [
+    "tailwind.config.cjs"
+  ],
+  "author": "Thammarith",
+  "license": "ISC"
+}
