@@ -1,17 +1,22 @@
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import {
     AdditionalUserInfo,
     getAdditionalUserInfo,
     getAuth,
+    onAuthStateChanged,
     RecaptchaVerifier,
     signInWithPhoneNumber,
     User,
 } from 'firebase/auth';
 import cx from 'classnames';
+import { useNavigate } from 'react-router-dom';
 
 import app, { firestore } from '../libs/firebase';
 import { Logger } from '../utils/logger';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { UserContext } from '../App';
+import { AccessData, CreationData, MemberData } from '../types/UserData';
+import { PROFILE_PATH } from '../routes';
 
 enum AuthState {
     NONE, // = 'NONE',
@@ -30,10 +35,13 @@ enum AuthState {
 const Authenticate = () => {
     const SIGN_IN_BUTTON_ID = 'sign-in-button';
 
-    const [authState, setAuthState] = React.useState(AuthState.NONE);
-    const [mobileNumber, setMobileNumber] = React.useState('');
-    const [otpCode, setOptCode] = React.useState('');
-    const [user, setUser] = React.useState<User>();
+    const [authState, setAuthState] = useState(AuthState.NONE);
+    const [mobileNumber, setMobileNumber] = useState('');
+    const [otpCode, setOptCode] = useState('');
+
+    const { user } = useContext(UserContext);
+
+    const navigate = useNavigate();
 
     const auth = getAuth(app);
     auth.useDeviceLanguage();
@@ -122,16 +130,12 @@ const Authenticate = () => {
                 Logger.log('otp verified');
                 setAuthState(AuthState.OTP_VERIFIED);
 
-                const user = result.user;
-
                 Logger.info(auth.currentUser);
                 // we can get isNewUser from this
                 const additionalUserInfo = getAdditionalUserInfo(result);
                 // Logger.info(foo);
 
-                console.log(result);
-                setUser(user);
-                upsertUser(user, additionalUserInfo);
+                upsertUser(result.user, additionalUserInfo);
             })
             .catch((error) => {
                 Logger.error(error);
@@ -142,42 +146,42 @@ const Authenticate = () => {
             });
     };
 
-    const upsertUser = async (user: User, additionalUserInfo: AdditionalUserInfo | null) => {
-        const userRef = doc(firestore, 'users', user.uid);
+    const upsertUser = async (u: User, additionalUserInfo: AdditionalUserInfo | null) => {
+        console.log('upserting user', u.uid);
+        const userRef = doc(firestore, 'users', u.uid);
 
-        const baseData = {
-            lastUpdated: Timestamp.now(),
+        const baseData: Pick<AccessData, 'lastAccessAt'> = {
+            lastAccessAt: new Date(),
         };
 
-        const newUserData = {
+        const newUserData: AccessData & CreationData & MemberData = {
             ...baseData,
-            userId: user.uid,
-            phoneNumber: user.phoneNumber,
-            createdAt: Timestamp.now(),
+            userId: u.uid,
+            phoneNumber: u.phoneNumber || '',
+            createdAt: new Date(),
+            firstName: 'เอกภพ',
+            lastName: 'ดาราวงศ์',
+            lastModifiedAt: new Date(),
         };
 
         const data = additionalUserInfo?.isNewUser ? newUserData : baseData;
-
-        // const res = await setDoc(userRef, data, { merge: true });
-        // console.log(res);
-
-        getUserData(user);
-    };
-
-    const getUserData = async (u: User) => {
-        console.log('requesting: ', u!.uid);
-        const docRef = doc(firestore, 'users', u!.uid);
-        const docData = await getDoc(docRef)
-            .then((res) => res)
-            .catch((err) => err);
-        console.info(docData);
+        await setDoc(userRef, data, { merge: true })
+            .then((res) => {
+                console.log(res);
+                navigate(PROFILE_PATH, { replace: true });
+                return true;
+            })
+            .catch((err) => {
+                console.error(err);
+                return false;
+            });
     };
 
     return (
         <div className="w-screen h-screen pt-16 flex justify-center">
             <div className="w-64">
                 <h1>
-                    Welcome {mobileNumber} ({authState})
+                    Welcome {mobileNumber} ({authState}) ({JSON.stringify(user)})
                 </h1>
 
                 <div id="recaptcha-container" />
