@@ -1,36 +1,27 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import React from 'react';
+import { User } from 'firebase/auth';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
 
-function App() {
-  const [count, setCount] = useState(0)
+import { firestore } from './libs/firebase';
+import Authenticate from './pages/Authenticate';
 
-  return (
-    <div className="App">
-          <h1 className="text-3xl font-bold underline">sdfsfsfsdf</h1>
-      
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
-}
+const App: React.FC = () => {
+    return <Authenticate />;
 
-export default App
+    const upsertUser = async (user: User) => {
+        const userRef = doc(firestore, 'users', user.uid);
+        const res = await setDoc(
+            userRef,
+            {
+                userId: user.uid,
+                phoneNumber: user.phoneNumber,
+                lastUpdated: Timestamp.now(),
+            },
+            { merge: true }
+        );
+
+        console.log(res);
+    };
+};
+
+export default App;
