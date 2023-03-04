@@ -1,9 +1,8 @@
-import React, { useContext, useMemo, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
     AdditionalUserInfo,
     getAdditionalUserInfo,
     getAuth,
-    onAuthStateChanged,
     RecaptchaVerifier,
     signInWithPhoneNumber,
     User,
@@ -13,10 +12,12 @@ import { useNavigate } from 'react-router-dom';
 
 import app, { firestore } from '../libs/firebase';
 import { Logger } from '../utils/logger';
-import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { UserContext } from '../App';
-import UserData, { AccessData, CreationData, MemberData } from '../types/UserData';
+import UserData, { AccessData } from '../types/UserData';
 import { PROFILE_PATH } from '../routes';
+
+import Logo from '../assets/images/tas-logo.png';
 
 enum AuthState {
     NONE, // = 'NONE',
@@ -179,53 +180,72 @@ const Authenticate = () => {
     };
 
     return (
-        <div className="w-screen h-screen pt-16 flex justify-center">
-            <div className="w-64">
-                <h1>
-                    Welcome {mobileNumber} ({authState}) ({JSON.stringify(user)})
-                </h1>
+        <main className="h-screen w-screen bg-tas-800 text-white">
+            <div className="w-full max-w-lg mx-auto py-16 px-8">
+                <section>
+                    <img src={Logo} className="w-16" />
+                    <h1 className="tas-heading-l font-semibold mt-4">
+                        สมาชิกออนไลน์
+                        <br />
+                        สมาคมดาราศาสตร์ไทย
+                    </h1>
+                </section>
 
-                <div id="recaptcha-container" />
-
-                <input
-                    key="1234"
-                    className="my-8 border-black border"
-                    type="text"
-                    onChange={(e) =>
-                        setMobileNumber(() => {
-                            if (e.target.value.length >= 3 && !e.target.value.includes('+')) {
-                                return `+66${e.target.value}`;
-                            }
-
-                            return e.target.value;
-                        })
-                    }
-                    disabled={authState >= AuthState.OTP_SENT}
-                />
-                {
-                    <button
-                        className={cx(authState >= AuthState.OTP_SENT && 'hidden')}
-                        id={SIGN_IN_BUTTON_ID}
-                        onClick={onSendOtpButtonClick}
-                    >
-                        Send OTP
-                    </button>
-                }
-
-                {authState >= AuthState.OTP_SENT && (
-                    <>
+                <section className="mt-8">
+                    <label>
+                        <span className="font-heading tas-body">หมายเลขโทรศัพท์</span>
                         <input
-                            className="my-8 border-black border"
+                            className="mt-3 border border-white w-full h-10 p-2 text-black"
                             type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            onChange={(e) => setOptCode(e.target.value)}
+                            onChange={(e) =>
+                                setMobileNumber(() => {
+                                    if (e.target.value.length >= 3 && !e.target.value.includes('+')) {
+                                        return `+66${e.target.value}`;
+                                    }
+
+                                    return e.target.value;
+                                })
+                            }
+                            disabled={authState >= AuthState.OTP_SENT}
                         />
-                        <button onClick={verifyOtp}>Verify OTP</button>
-                    </>
-                )}
+                    </label>
+                    {
+                        <button
+                            className={cx(
+                                authState >= AuthState.OTP_SENT && 'hidden',
+                                'bg-white px-3 py-2 mt-3',
+                                'tas-body text-black font-heading font-medium'
+                            )}
+                            id={SIGN_IN_BUTTON_ID}
+                            onClick={onSendOtpButtonClick}
+                        >
+                            รับรหัสผ่าน
+                        </button>
+                    }
+                    {authState >= AuthState.OTP_SENT && (
+                        <label className="mt-6 block">
+                            <span className="font-heading tas-body">รหัสผ่านที่ได้รับ</span>
+                            <input
+                                className="mt-3 border border-white w-full h-10 p-2 text-black"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                onChange={(e) => setOptCode(e.target.value)}
+                            />
+                            <button
+                                className={cx(
+                                    'bg-white px-3 py-2 mt-3',
+                                    'tas-body text-black font-heading font-medium'
+                                )}
+                                onClick={verifyOtp}
+                            >
+                                ตรวจสอบ
+                            </button>
+                        </label>
+                    )}
+                </section>
             </div>
-        </div>
+        </main>
     );
 };
 
