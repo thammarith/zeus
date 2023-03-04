@@ -15,7 +15,7 @@ import app, { firestore } from '../libs/firebase';
 import { Logger } from '../utils/logger';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { UserContext } from '../App';
-import { AccessData, CreationData, MemberData } from '../types/UserData';
+import UserData, { AccessData, CreationData, MemberData } from '../types/UserData';
 import { PROFILE_PATH } from '../routes';
 
 enum AuthState {
@@ -154,7 +154,7 @@ const Authenticate = () => {
             lastAccessAt: new Date(),
         };
 
-        const newUserData: AccessData & CreationData & MemberData = {
+        const newUserData: UserData = {
             ...baseData,
             userId: u.uid,
             phoneNumber: u.phoneNumber || '',
@@ -162,6 +162,7 @@ const Authenticate = () => {
             firstName: 'เอกภพ',
             lastName: 'ดาราวงศ์',
             lastModifiedAt: new Date(),
+            points: [],
         };
 
         const data = additionalUserInfo?.isNewUser ? newUserData : baseData;

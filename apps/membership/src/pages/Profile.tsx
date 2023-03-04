@@ -1,10 +1,35 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import cx from 'classnames';
+import QrCode from 'qrcode';
+
 import { UserContext, UserDataContext } from '../App';
 import Loading from '../components/Loading';
 
 const Profile = () => {
     const { user } = useContext(UserContext);
     const { userData } = useContext(UserDataContext);
+
+    const [qrCode, setQrCode] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        if (!userData?.userId) return;
+
+        QrCode.toDataURL(userData.userId, {
+            errorCorrectionLevel: 'H',
+            margin: 0,
+            width: 192,
+            color: {
+                dark: '#000', // Blue dots
+                light: '#0000', // Transparent background
+            },
+        })
+            .then((url) => {
+                setQrCode(url);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }, [userData?.userId]);
 
     if (userData === undefined)
         return (
@@ -15,13 +40,48 @@ const Profile = () => {
 
     if (userData === null) return <h1>NO DATA!</h1>;
 
+    const points = userData.points.reduce((p, c) => p + c.points, 0);
+
+    const MyQrCode = () => <img src={qrCode} alt={userData.userId} title={userData.userId} />;
+
+    const Card = ({ title, content, className }: { title: string; content: number | string; className?: string }) => (
+        <div className={cx('bg-blue-50 text-black rounded-md p-4 min-w-[6rem]', className)}>
+            <h3 className="tas-body-small">{title}</h3>
+            <div className="tas-body-large font-semibold">{content}</div>
+        </div>
+    );
+
     return (
-        <main className="w-screen h-screen">
-            <section className="flex items-center justify-center">
-                <h1>
-                    Hi, {userData.firstName} {userData.lastName}
-                </h1>
-            </section>
+        <main className="h-screen w-screen bg-tas-800 text-white">
+            <div className="w-full max-w-lg mx-auto py-16 px-8">
+                <section className="">
+                    <h1 className="tas-heading-l font-semibold">
+                        <div className="tas-caption-l">สวัสดี</div>
+                        {userData.firstName}&#32;{userData.lastName}
+                    </h1>
+                </section>
+                <section className="mt-8 font-heading flex gap-4">
+                    {/* <div>
+                        สมาชิกระดับ: <strong>ดาวฤกษ์</strong>
+                    </div> */}
+                    <Card title="แต้ม" content={points} />
+                    <Card
+                        title="สมาชิกตั้งแต่"
+                        content={new Intl.DateTimeFormat('th-th', {
+                            day: 'numeric',
+                            month: 'narrow',
+                            year: '2-digit',
+                        }).format(userData.createdAt)}
+                    />
+                </section>
+                <section className="mt-8">
+                    <h2 className="tas-heading-m font-semibold">บัตรสมาชิกของฉัน</h2>
+                    {/* TODO: Make a nice card front and tap to show the QR Code */}
+                    <div className="mt-4 p-8 bg-blue-50 text-black rounded-md flex justify-center">
+                        <MyQrCode />
+                    </div>
+                </section>
+            </div>
         </main>
     );
 };

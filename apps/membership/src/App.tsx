@@ -37,7 +37,7 @@ type IUserContext = {
 
 type IUserDataContext = {
     userData: UserData | null | undefined;
-    setUserData: React.Dispatch<React.SetStateAction<UserData | null>>;
+    setUserData: React.Dispatch<React.SetStateAction<UserData | null | undefined>>;
 };
 
 export const UserContext = createContext<IUserContext>({

@@ -15,12 +15,14 @@ export interface AccessData {
     lastModifiedAt: Date;
 }
 
-export default interface UserData extends AccessData, MemberData, CreationData {}
-
 interface Point {
     sourceId: string;
     points: number;
     basePoints: number;
     multiplier: number;
     date: Date;
+}
+
+export default interface UserData extends AccessData, MemberData, CreationData {
+    points: Point[];
 }
