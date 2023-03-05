@@ -6,6 +6,7 @@ import { UserContext, UserDataContext } from "../App";
 import Loading from "../components/Loading";
 import { Navigate } from "react-router-dom";
 import { ERROR_PATH } from "../routes";
+import { Logger } from "../utils/logger";
 
 const Profile = () => {
     const { user } = useContext(UserContext);
@@ -29,20 +30,21 @@ const Profile = () => {
                 setQrCode(url);
             })
             .catch((err) => {
-                console.error(err);
+                Logger.error(err);
             });
     }, [userData?.userId]);
 
-    if (userData === undefined)
+    if (userData === undefined) {
         return (
             <div className="w-screen h-screen flex items-center justify-center">
                 <Loading />
             </div>
         );
+    }
 
     if (userData === null) return <Navigate to={ERROR_PATH} />;
 
-    const points = userData.points.reduce((p, c) => p + c.points, 0);
+    const points = userData.points?.reduce((p, c) => p + c.points, 0);
 
     const MyQrCode = () => <img src={qrCode} alt={userData.userId} title={userData.userId} />;
 
@@ -73,7 +75,7 @@ const Profile = () => {
                             day: "numeric",
                             month: "narrow",
                             year: "2-digit",
-                        }).format(userData.createdAt)}
+                        }).format(new Date(user?.metadata.creationTime!))}
                     />
                 </section>
                 <section className="mt-8">

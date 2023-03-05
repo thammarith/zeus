@@ -1,17 +1,25 @@
 import { User } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, getDocFromServer, setDoc } from "firebase/firestore";
 import { firestore } from "../libs/firebase";
 import UserData from "../types/UserData";
-import { mapToUserData } from "./userDataMapper";
+import { Logger } from "../utils/logger";
 
 export const getUserData = async (user: User, then?: (_: UserData) => any) => {
     const docRef = doc(firestore, "users", user.uid);
+
     return await getDoc(docRef)
         .then((docData) => {
-            const mappedData = mapToUserData(docData.data());
-            then?.(mappedData);
+            const data = docData.data() as UserData;
+
+            if (!data) return false;
+
+            then?.(data);
+            return true;
         })
-        .catch((err) => err);
+        .catch((err) => {
+            Logger.error(err);
+            return err;
+        });
 };
 
 export const upsertUser = async (user: User, userData: UserData, then?: () => any) => {
@@ -19,7 +27,6 @@ export const upsertUser = async (user: User, userData: UserData, then?: () => an
 
     const upsertingData = {
         ...userData,
-        lastModifiedAt: new Date(),
     };
 
     return await setDoc(userRef, upsertingData, { merge: true })
@@ -28,7 +35,7 @@ export const upsertUser = async (user: User, userData: UserData, then?: () => an
             return true;
         })
         .catch((err) => {
-            console.error(err);
+            Logger.error(err);
             return false;
         });
 };

@@ -54,7 +54,6 @@ const ProfileEdit = () => {
             // firstName: 'เอกภพ',
             // lastName: 'ดาราวงศ์',
             ...formData,
-            lastModifiedAt: new Date(),
         } as UserData;
 
         upsertUser(user, newMemberData, async () => {

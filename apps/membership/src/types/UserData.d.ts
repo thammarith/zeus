@@ -1,7 +1,6 @@
 export interface CreationData {
     userId: string;
     phoneNumber: string;
-    createdAt: Date;
 }
 
 interface MemberData {
@@ -9,11 +8,6 @@ interface MemberData {
     lastName?: string;
     email?: string;
     membershipId?: string;
-}
-
-export interface AccessData {
-    lastAccessAt: Date;
-    lastModifiedAt: Date;
 }
 
 interface Point {
@@ -24,6 +18,6 @@ interface Point {
     date: Date;
 }
 
-export default interface UserData extends AccessData, MemberData, CreationData {
+export default interface UserData extends MemberData, CreationData {
     points: Point[];
 }

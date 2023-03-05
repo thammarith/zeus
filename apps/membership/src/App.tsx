@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-import { createBrowserRouter, RouterProvider, RouteObject } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, RouteObject, createHashRouter } from "react-router-dom";
 
 import app from "./libs/firebase";
 
@@ -15,6 +15,7 @@ import ProfileEdit from "./pages/ProfileEdit";
 import Profile from "./pages/Profile";
 import PrivateGuard from "./pages/PrivateGuard";
 import { getUserData } from "./helpers/userData";
+import { Logger } from "./utils/logger";
 
 const routes: RouteObject[] = [
     {
@@ -42,7 +43,9 @@ const routes: RouteObject[] = [
     },
 ];
 
-const router = createBrowserRouter(routes);
+const router = createHashRouter(routes, {
+    // basename: "/membership/",
+});
 
 type IUserContext = {
     user: User | null | undefined;
@@ -69,25 +72,20 @@ const App: React.FC = () => {
     const [userData, setUserData] = useState<UserData | null | undefined>(undefined);
 
     useEffect(() => {
-        if (!user?.uid) return;
-        getUserData(user, setUserData);
-    }, [user]);
-
-    useEffect(() => {
         const auth = getAuth(app);
         onAuthStateChanged(
             auth,
             async (_user) => {
-                console.log("User state changed");
+                Logger.log("User state changed");
                 setUser(_user);
+
+                if (_user) getUserData(_user, setUserData);
             },
             (err) => {
-                console.error(err);
+                Logger.error(err);
             }
         );
     }, []);
-
-    console.log("App is re-rendered");
 
     if (user === undefined)
         return (

@@ -8,17 +8,18 @@ import {
     User,
 } from "firebase/auth";
 import cx from "classnames";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 import app, { firestore } from "../libs/firebase";
 import { Logger } from "../utils/logger";
 import { doc, setDoc } from "firebase/firestore";
-import { UserContext } from "../App";
-import UserData, { AccessData } from "../types/UserData";
+import { UserContext, UserDataContext } from "../App";
+import UserData from "../types/UserData";
 import { PROFILE_EDIT_PATH, PROFILE_PATH } from "../routes";
 
 import Logo from "../assets/images/tas-logo.png";
-import { upsertUser } from "../helpers/userData";
+import { getUserData, upsertUser } from "../helpers/userData";
+import Loading from "../components/Loading";
 
 enum AuthState {
     NONE, // = 'NONE',
@@ -42,11 +43,24 @@ const Authenticate = () => {
     const [otpCode, setOptCode] = useState("");
 
     const { user } = useContext(UserContext);
+    const { userData, setUserData } = useContext(UserDataContext);
 
     const navigate = useNavigate();
 
     const auth = getAuth(app);
     auth.useDeviceLanguage();
+
+    if (user === undefined) {
+        return (
+            <div className="w-screen h-screen flex items-center justify-center">
+                <Loading />
+            </div>
+        );
+    }
+
+    if (userData) {
+        return <Navigate to={PROFILE_PATH} />;
+    }
 
     const onSendOtpButtonClick = async () => {
         Logger.log("beginning authentication ceremony");
@@ -81,8 +95,8 @@ const Authenticate = () => {
                 size: "invisible",
                 callback: (response: any) => {},
                 "error-callback": (error: any) => {
-                    console.error("error-callback");
-                    console.error(error);
+                    Logger.error("error-callback");
+                    Logger.error(error);
                 },
             },
             auth
@@ -149,24 +163,23 @@ const Authenticate = () => {
     };
 
     const updateUserOnFirestore = async (u: User, additionalUserInfo: AdditionalUserInfo | null) => {
-        const baseData = {
-            lastAccessAt: new Date(),
-        } as UserData;
+        if (!additionalUserInfo?.isNewUser) {
+            navigate(PROFILE_PATH, { replace: true });
+            return;
+        }
 
         const newUserData: UserData = {
-            ...baseData,
             userId: u.uid,
             phoneNumber: u.phoneNumber || "",
-            createdAt: new Date(),
-            lastModifiedAt: new Date(),
             points: [],
         };
 
-        const data = additionalUserInfo?.isNewUser ? newUserData : baseData;
-
-        await upsertUser(u, data, () => {
+        await upsertUser(u, newUserData, async () => {
             navigate(PROFILE_EDIT_PATH, { replace: true });
+            return;
         });
+
+        // await getUserData(u, setUserData);
     };
 
     return (
