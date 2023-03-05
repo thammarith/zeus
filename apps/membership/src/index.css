@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .tas-heading-l {
+        @apply font-heading font-bold;
+        @apply text-2xl lg:text-4xl;
+    }
+
+    .tas-caption-l {
+        @apply font-heading font-normal;
+        @apply text-lg lg:text-2xl;
+    }
+
+    .tas-heading-m {
+        @apply font-heading font-bold;
+        @apply text-lg lg:text-2xl;
+    }
+
+    .tas-caption-m {
+        @apply font-heading font-normal;
+        @apply text-base lg:text-lg;
+    }
+
+    .tas-body-large {
+        @apply text-lg lg:text-2xl;
+    }
+
+    .tas-body {
+        @apply text-base lg:text-lg;
+    }
+
+    .tas-body-small {
+        @apply text-sm lg:text-base;
+    }
+}

@@ -1,10 +1,7 @@
 module.exports = {
-    extends: ['turbo', 'prettier'],
-    rules: {},
-    parseOption: {
-        ecmaVersion: 'latest',
-    },
-    env: {
-        es6: true,
-    },
+  extends: ["next", "turbo", "prettier"],
+  rules: {
+    "@next/next/no-html-link-for-pages": "off",
+    "react/jsx-key": "off",
+  },
 };

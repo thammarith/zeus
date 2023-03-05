@@ -1,29 +1,26 @@
 {
-    "name": "zeus",
-    "version": "0.0.0",
-    "private": true,
-    "workspaces": [
-        "apps/*",
-        "packages/*"
-    ],
-    "scripts": {
-        "build": "turbo run build",
-        "dev": "turbo run dev --parallel",
-        "lint": "turbo run lint",
-        "format": "prettier --write \"**/*.{ts,tsx,md}\""
-    },
-    "dependencies": {},
-    "devDependencies": {
-        "autoprefixer": "^10.4.12",
-        "eslint-config-custom": "*",
-        "postcss": "^8.4.17",
-        "prettier": "^2.8.2",
-        "prettier-plugin-tailwindcss": "^0.1.11",
-        "tailwindcss": "^3.2.4",
-        "turbo": "^1.6.3"
-    },
-    "engines": {
-        "node": ">=14.0.0"
-    },
-    "packageManager": "yarn@1.22.19"
+  "name": "zeus",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "eslint-config-custom": "workspace:*",
+    "tailwind-config": "workspace:*",
+    "prettier": "latest",
+    "turbo": "latest"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "packageManager": "pnpm@7.9.5"
 }
