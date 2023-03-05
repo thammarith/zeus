@@ -5,8 +5,9 @@ export interface CreationData {
 }
 
 interface MemberData {
-    firstName: string;
-    lastName: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
     membershipId?: string;
 }
 

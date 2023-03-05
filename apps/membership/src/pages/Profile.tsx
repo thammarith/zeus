@@ -1,9 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
-import cx from 'classnames';
-import QrCode from 'qrcode';
+import React, { useContext, useEffect, useState } from "react";
+import cx from "classnames";
+import QrCode from "qrcode";
 
-import { UserContext, UserDataContext } from '../App';
-import Loading from '../components/Loading';
+import { UserContext, UserDataContext } from "../App";
+import Loading from "../components/Loading";
+import { Navigate } from "react-router-dom";
+import { ERROR_PATH } from "../routes";
 
 const Profile = () => {
     const { user } = useContext(UserContext);
@@ -15,12 +17,12 @@ const Profile = () => {
         if (!userData?.userId) return;
 
         QrCode.toDataURL(userData.userId, {
-            errorCorrectionLevel: 'H',
+            errorCorrectionLevel: "H",
             margin: 0,
             width: 192,
             color: {
-                dark: '#000', // Blue dots
-                light: '#0000', // Transparent background
+                dark: "#000", // Blue dots
+                light: "#0000", // Transparent background
             },
         })
             .then((url) => {
@@ -38,14 +40,14 @@ const Profile = () => {
             </div>
         );
 
-    if (userData === null) return <h1>NO DATA!</h1>;
+    if (userData === null) return <Navigate to={ERROR_PATH} />;
 
     const points = userData.points.reduce((p, c) => p + c.points, 0);
 
     const MyQrCode = () => <img src={qrCode} alt={userData.userId} title={userData.userId} />;
 
     const Card = ({ title, content, className }: { title: string; content: number | string; className?: string }) => (
-        <div className={cx('bg-blue-50 text-black rounded-md p-4 min-w-[6rem]', className)}>
+        <div className={cx("bg-blue-50 text-black rounded-md p-4 min-w-[6rem]", className)}>
             <h3 className="tas-body-small">{title}</h3>
             <div className="tas-body-large font-semibold">{content}</div>
         </div>
@@ -67,10 +69,10 @@ const Profile = () => {
                     <Card title="แต้ม" content={points} />
                     <Card
                         title="สมาชิกตั้งแต่"
-                        content={new Intl.DateTimeFormat('th-th', {
-                            day: 'numeric',
-                            month: 'narrow',
-                            year: '2-digit',
+                        content={new Intl.DateTimeFormat("th-th", {
+                            day: "numeric",
+                            month: "narrow",
+                            year: "2-digit",
                         }).format(userData.createdAt)}
                     />
                 </section>

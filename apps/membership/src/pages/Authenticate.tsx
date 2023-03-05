@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState } from "react";
 import {
     AdditionalUserInfo,
     getAdditionalUserInfo,
@@ -6,18 +6,19 @@ import {
     RecaptchaVerifier,
     signInWithPhoneNumber,
     User,
-} from 'firebase/auth';
-import cx from 'classnames';
-import { useNavigate } from 'react-router-dom';
+} from "firebase/auth";
+import cx from "classnames";
+import { useNavigate } from "react-router-dom";
 
-import app, { firestore } from '../libs/firebase';
-import { Logger } from '../utils/logger';
-import { doc, setDoc } from 'firebase/firestore';
-import { UserContext } from '../App';
-import UserData, { AccessData } from '../types/UserData';
-import { PROFILE_PATH } from '../routes';
+import app, { firestore } from "../libs/firebase";
+import { Logger } from "../utils/logger";
+import { doc, setDoc } from "firebase/firestore";
+import { UserContext } from "../App";
+import UserData, { AccessData } from "../types/UserData";
+import { PROFILE_EDIT_PATH, PROFILE_PATH } from "../routes";
 
-import Logo from '../assets/images/tas-logo.png';
+import Logo from "../assets/images/tas-logo.png";
+import { upsertUser } from "../helpers/userData";
 
 enum AuthState {
     NONE, // = 'NONE',
@@ -34,11 +35,11 @@ enum AuthState {
 }
 
 const Authenticate = () => {
-    const SIGN_IN_BUTTON_ID = 'sign-in-button';
+    const SIGN_IN_BUTTON_ID = "sign-in-button";
 
     const [authState, setAuthState] = useState(AuthState.NONE);
-    const [mobileNumber, setMobileNumber] = useState('');
-    const [otpCode, setOptCode] = useState('');
+    const [mobileNumber, setMobileNumber] = useState("");
+    const [otpCode, setOptCode] = useState("");
 
     const { user } = useContext(UserContext);
 
@@ -48,10 +49,10 @@ const Authenticate = () => {
     auth.useDeviceLanguage();
 
     const onSendOtpButtonClick = async () => {
-        Logger.log('beginning authentication ceremony');
+        Logger.log("beginning authentication ceremony");
 
         if (!auth) {
-            Logger.error('auth is not defined');
+            Logger.error("auth is not defined");
             return;
         }
 
@@ -71,16 +72,16 @@ const Authenticate = () => {
     };
 
     const verifyRecaptcha = async () => {
-        Logger.log('verifying recaptcha');
+        Logger.log("verifying recaptcha");
         setAuthState(AuthState.VERIFYING_RECAPTCHA);
 
         window.recaptchaVerifier = new RecaptchaVerifier(
             SIGN_IN_BUTTON_ID,
             {
-                size: 'invisible',
+                size: "invisible",
                 callback: (response: any) => {},
-                'error-callback': (error: any) => {
-                    console.error('error-callback');
+                "error-callback": (error: any) => {
+                    console.error("error-callback");
                     console.error(error);
                 },
             },
@@ -90,7 +91,7 @@ const Authenticate = () => {
         return await window.recaptchaVerifier
             .verify()
             .then(() => {
-                Logger.log('recaptcha verified');
+                Logger.log("recaptcha verified");
                 setAuthState(AuthState.RECAPTCHA_VERIFIED);
                 return true;
             })
@@ -102,7 +103,7 @@ const Authenticate = () => {
     };
 
     const sendOtp = async () => {
-        Logger.log('signing the user in');
+        Logger.log("signing the user in");
 
         const appVerifier = window.recaptchaVerifier;
 
@@ -122,13 +123,13 @@ const Authenticate = () => {
     };
 
     const verifyOtp = () => {
-        Logger.log('verifying otp');
+        Logger.log("verifying otp");
         setAuthState(AuthState.VERIFYING_OTP);
 
         window.confirmationResult
             .confirm(otpCode)
             .then((result) => {
-                Logger.log('otp verified');
+                Logger.log("otp verified");
                 setAuthState(AuthState.OTP_VERIFIED);
 
                 Logger.info(auth.currentUser);
@@ -136,7 +137,7 @@ const Authenticate = () => {
                 const additionalUserInfo = getAdditionalUserInfo(result);
                 // Logger.info(foo);
 
-                upsertUser(result.user, additionalUserInfo);
+                updateUserOnFirestore(result.user, additionalUserInfo);
             })
             .catch((error) => {
                 Logger.error(error);
@@ -147,36 +148,25 @@ const Authenticate = () => {
             });
     };
 
-    const upsertUser = async (u: User, additionalUserInfo: AdditionalUserInfo | null) => {
-        console.log('upserting user', u.uid);
-        const userRef = doc(firestore, 'users', u.uid);
-
-        const baseData: Pick<AccessData, 'lastAccessAt'> = {
+    const updateUserOnFirestore = async (u: User, additionalUserInfo: AdditionalUserInfo | null) => {
+        const baseData = {
             lastAccessAt: new Date(),
-        };
+        } as UserData;
 
         const newUserData: UserData = {
             ...baseData,
             userId: u.uid,
-            phoneNumber: u.phoneNumber || '',
+            phoneNumber: u.phoneNumber || "",
             createdAt: new Date(),
-            firstName: 'เอกภพ',
-            lastName: 'ดาราวงศ์',
             lastModifiedAt: new Date(),
             points: [],
         };
 
         const data = additionalUserInfo?.isNewUser ? newUserData : baseData;
-        await setDoc(userRef, data, { merge: true })
-            .then((res) => {
-                console.log(res);
-                navigate(PROFILE_PATH, { replace: true });
-                return true;
-            })
-            .catch((err) => {
-                console.error(err);
-                return false;
-            });
+
+        await upsertUser(u, data, () => {
+            navigate(PROFILE_EDIT_PATH, { replace: true });
+        });
     };
 
     return (
@@ -199,7 +189,7 @@ const Authenticate = () => {
                             type="text"
                             onChange={(e) =>
                                 setMobileNumber(() => {
-                                    if (e.target.value.length >= 3 && !e.target.value.includes('+')) {
+                                    if (e.target.value.length >= 3 && !e.target.value.includes("+")) {
                                         return `+66${e.target.value}`;
                                     }
 
@@ -212,9 +202,9 @@ const Authenticate = () => {
                     {
                         <button
                             className={cx(
-                                authState >= AuthState.OTP_SENT && 'hidden',
-                                'bg-white px-3 py-2 mt-3',
-                                'tas-body text-black font-heading font-medium'
+                                authState >= AuthState.OTP_SENT && "hidden",
+                                "bg-white px-3 py-2 mt-6",
+                                "tas-body text-black font-heading font-medium"
                             )}
                             id={SIGN_IN_BUTTON_ID}
                             onClick={onSendOtpButtonClick}
@@ -223,25 +213,27 @@ const Authenticate = () => {
                         </button>
                     }
                     {authState >= AuthState.OTP_SENT && (
-                        <label className="mt-6 block">
-                            <span className="font-heading tas-body">รหัสผ่านที่ได้รับ</span>
-                            <input
-                                className="mt-3 border border-white w-full h-10 p-2 text-black"
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                onChange={(e) => setOptCode(e.target.value)}
-                            />
+                        <>
+                            <label className="mt-6 block">
+                                <span className="font-heading tas-body">รหัสผ่านที่ได้รับ</span>
+                                <input
+                                    className="mt-3 border border-white w-full h-10 p-2 text-black"
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    onChange={(e) => setOptCode(e.target.value)}
+                                />
+                            </label>
                             <button
                                 className={cx(
-                                    'bg-white px-3 py-2 mt-3',
-                                    'tas-body text-black font-heading font-medium'
+                                    "bg-white px-3 py-2 mt-6",
+                                    "tas-body text-black font-heading font-medium"
                                 )}
                                 onClick={verifyOtp}
                             >
                                 ตรวจสอบ
                             </button>
-                        </label>
+                        </>
                     )}
                 </section>
             </div>

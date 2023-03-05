@@ -18,7 +18,8 @@ module.exports = {
                     700: '#001155',
                     800: '#000b39',
                     900: '#00061c',
-                }
+                    secondary: '#505A5F',
+                },
             },
             fontFamily: {
                 heading: ['Anuphan', ...defaultTheme.fontFamily.sans],

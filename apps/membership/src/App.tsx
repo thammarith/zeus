@@ -1,21 +1,31 @@
-import React, { createContext, Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import { createBrowserRouter, RouterProvider, redirect } from 'react-router-dom';
+import React, { createContext, useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { createBrowserRouter, RouterProvider, RouteObject } from "react-router-dom";
 
-import app, { firestore } from './libs/firebase';
-import Authenticate from './pages/Authenticate';
-import Profile from './pages/Profile';
-import Loading from './components/Loading';
-import { AUTHENTICATE_PATH, PROFILE_PATH } from './routes';
-import PrivateGuard from './pages/PrivateGuard';
-import UserData from './types/UserData';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
-import { mapToUserData } from './helpers/userDataMapper';
+import app from "./libs/firebase";
 
-const routes = [
+import UserData from "./types/UserData";
+
+import Loading from "./components/Loading";
+
+import { PROFILE_EDIT_PATH, ERROR_PATH, INDEX_PATH, PROFILE_PATH } from "./routes";
+import Authenticate from "./pages/Authenticate";
+import Error from "./pages/Error";
+import ProfileEdit from "./pages/ProfileEdit";
+import Profile from "./pages/Profile";
+import PrivateGuard from "./pages/PrivateGuard";
+import { getUserData } from "./helpers/userData";
+
+const routes: RouteObject[] = [
     {
-        path: AUTHENTICATE_PATH,
+        path: INDEX_PATH,
+        // path: AUTHENTICATE_PATH,
         element: <Authenticate />,
+    },
+    {
+        path: ERROR_PATH,
+        // path: AUTHENTICATE_PATH,
+        element: <Error />,
     },
     {
         element: <PrivateGuard />,
@@ -23,6 +33,10 @@ const routes = [
             {
                 path: PROFILE_PATH,
                 element: <Profile />,
+            },
+            {
+                path: PROFILE_EDIT_PATH,
+                element: <ProfileEdit />,
             },
         ],
     },
@@ -55,32 +69,25 @@ const App: React.FC = () => {
     const [userData, setUserData] = useState<UserData | null | undefined>(undefined);
 
     useEffect(() => {
-        console.log('>>>>>>>>> useEffect is called');
         if (!user?.uid) return;
+        getUserData(user, setUserData);
+    }, [user]);
 
-        const docRef = doc(firestore, 'users', user.uid);
-        getDoc(docRef)
-            .then((docData) => {
-                const mappedData = mapToUserData(docData.data());
-                console.log(mappedData);
-                setUserData(mappedData);
-            })
-            .catch((err) => err);
-    }, [user?.uid]);
+    useEffect(() => {
+        const auth = getAuth(app);
+        onAuthStateChanged(
+            auth,
+            async (_user) => {
+                console.log("User state changed");
+                setUser(_user);
+            },
+            (err) => {
+                console.error(err);
+            }
+        );
+    }, []);
 
-    const auth = getAuth(app);
-    onAuthStateChanged(
-        auth,
-        async (_user) => {
-            console.log('User state changed');
-            setUser(_user);
-        },
-        (err) => {
-            console.error(err);
-        }
-    );
-
-    console.log('App is re-rendered');
+    console.log("App is re-rendered");
 
     if (user === undefined)
         return (
