@@ -4,18 +4,20 @@ import { createBrowserRouter, RouterProvider, RouteObject, createHashRouter } fr
 
 import app from "./libs/firebase";
 
+import { getUserData } from "./helpers/userData";
+import { Logger } from "./utils/logger";
+
 import UserData from "./types/UserData";
 
 import Loading from "./components/Loading";
 
-import { PROFILE_EDIT_PATH, ERROR_PATH, INDEX_PATH, PROFILE_PATH } from "./routes";
+import { PROFILE_EDIT_PATH, ERROR_PATH, INDEX_PATH, PROFILE_PATH, WELCOME_PATH } from "./routes";
 import Authenticate from "./pages/Authenticate";
 import Error from "./pages/Error";
 import ProfileEdit from "./pages/ProfileEdit";
 import Profile from "./pages/Profile";
 import PrivateGuard from "./pages/PrivateGuard";
-import { getUserData } from "./helpers/userData";
-import { Logger } from "./utils/logger";
+import Welcome from "./pages/Welcome";
 
 const routes: RouteObject[] = [
     {
@@ -32,6 +34,10 @@ const routes: RouteObject[] = [
         element: <PrivateGuard />,
         children: [
             {
+                path: WELCOME_PATH,
+                element: <Welcome />,
+            },
+            {
                 path: PROFILE_PATH,
                 element: <Profile />,
             },
@@ -43,9 +49,7 @@ const routes: RouteObject[] = [
     },
 ];
 
-const router = createHashRouter(routes, {
-    // basename: "/membership/",
-});
+const router = createHashRouter(routes);
 
 type IUserContext = {
     user: User | null | undefined;
@@ -89,7 +93,7 @@ const App: React.FC = () => {
 
     if (user === undefined)
         return (
-            <div className="w-screen h-screen flex items-center justify-center">
+            <div className="w-screen min-h-screen flex items-center justify-center">
                 <Loading />
             </div>
         );
