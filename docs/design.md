@@ -2,6 +2,8 @@
 
 ## Colours
 
+https://accessiblepalette.com/?lightness=98,92,86,80,72,60,48,38,29,16.75&E94C49=0,0&F8D147=0,-16&64C273=0,0&001980=0,0&69788f=0,0&808080=0,0
+
 ### AI Generated
 
 -   Blue 100: #6A7EFF

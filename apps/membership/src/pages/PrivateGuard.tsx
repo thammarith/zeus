@@ -1,15 +1,18 @@
-import React, { useContext } from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import React, { useContext, useEffect } from 'react';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 
-import { UserContext } from '../App';
 import { AUTHENTICATE_PATH, INDEX_PATH } from '../routes';
+import { useAuth } from '../contexts/AuthContext';
 
-const Private = () => {
-    const { user } = useContext(UserContext);
+const PrivateGuard = () => {
+    const location = useLocation();
+    const auth = useAuth();
 
-    if (user === null) return <Navigate to={INDEX_PATH} />;
+    console.log(auth)
+
+    if (false) return <Navigate to="/login" state={{ from: location }} replace />;
 
     return <Outlet />;
 };
 
-export default Private;
+export default PrivateGuard;
