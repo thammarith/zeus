@@ -8,7 +8,7 @@ import { Logger } from '../utils/logger';
 import Loading from '../components/Loading';
 import { UserCredential } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { PROFILE_PATH, WELCOME_PATH } from '../routes';
+import { PROFILE_EDIT_PATH, PROFILE_PATH, WELCOME_PATH } from '../routes';
 
 enum AuthState {
     NONE,
@@ -132,7 +132,7 @@ const Authenticate = () => {
             .then((res) => {
                 if (res) {
                     setAuthState(AuthState.REGISTERED);
-                    navigate(WELCOME_PATH);
+                    navigate(PROFILE_EDIT_PATH);
                 } else if (res === false) {
                     setAuthState(AuthState.SIGNED_IN);
                     navigate(PROFILE_PATH);

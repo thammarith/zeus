@@ -3,7 +3,7 @@ export interface CreationData {
     phoneNumber: string;
 }
 
-interface MemberData {
+export interface ProfileData {
     firstName?: string;
     lastName?: string;
     email?: string;
@@ -18,6 +18,8 @@ interface Point {
     date: Date;
 }
 
-export default interface UserData extends MemberData, CreationData {
+export interface MemberData extends ProfileData, CreationData {
     points: Point[];
 }
+
+export default MemberData;

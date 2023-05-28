@@ -51,7 +51,9 @@ const App: React.FC = () => {
                         <Route path={INDEX_PATH} element={<></>} />
                         <Route path={AUTHENTICATE_PATH} element={<Authenticate />} />
                         <Route element={<PrivateGuard />}>
-                            <Route path={WELCOME_PATH} element={<div>welceom</div>} />
+                            <Route path={WELCOME_PATH} element={<Welcome />} />
+                            <Route path={PROFILE_EDIT_PATH} element={<ProfileEdit />} />
+                            <Route path={PROFILE_PATH} element={<div>Dein Profil</div>} />
                             <Route path="inside" element={<div>inside</div>} />
                         </Route>
                     </Route>

@@ -1,151 +1,155 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import cx from 'classnames';
-import { useNavigate } from 'react-router-dom';
 
-import { UserContext, UserDataContext } from '../App';
-
-import UserData, { MemberData } from '../types/UserData';
-
-import Loading from '../components/Loading';
+import { useAuth } from '../contexts/AuthContext';
+import { MemberData, ProfileData } from '../types/UserData';
+import { upsertUser } from '../helpers/userData';
 import Input from '../components/Input';
-import { getUserData, upsertUser } from '../helpers/userData';
-import { PROFILE_PATH } from '../routes';
-import { getSessionItem } from '../helpers/sessionStorage';
+import { getSessionItem, removeSessionItem } from '../helpers/sessionStorage';
 import { IS_NEW_USER } from '../constants/sessionStorage';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { PROFILE_PATH } from '../routes';
 
 const ProfileEdit = () => {
-    const { user } = useContext(UserContext);
-    const { userData, setUserData } = useContext(UserDataContext);
-
-    const [formData, setFormData] = useState<MemberData>();
-
-    const isNewUser = getSessionItem(IS_NEW_USER) === 'true';
-
+    const auth = useAuth();
     const navigate = useNavigate();
 
+    const [formData, setFormData] = useState<ProfileData>();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const isNewUser = getSessionItem(IS_NEW_USER) === 'true';
+
     useEffect(() => {
-        if (!userData) return;
+        if (!auth?.user || !auth?.memberData) return;
 
-        setFormData({
-            firstName: userData.firstName ?? '',
-            lastName: userData.lastName ?? '',
-            email: userData.email ?? '',
-            membershipId: userData.membershipId ?? '',
-        });
-    }, [userData]);
+        const { firstName = '', lastName = '', email = '', membershipId = '' } = auth.memberData;
+        setFormData({ firstName, lastName, email, membershipId });
+    }, [auth]);
 
-    if (userData === undefined)
-        return (
-            <div className="w-screen min-h-screen flex items-center justify-center">
-                <Loading />
-            </div>
-        );
-
-    if (!user || userData === null) return <h1>NO DATA!</h1>;
+    if (!auth?.user || !auth?.memberData) return <h1>NO DATA!</h1>;
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
-        const newState = { ...formData, [name]: value } as Pick<MemberData, keyof MemberData>;
-        setFormData(newState);
+        setFormData({ ...formData, [name]: value });
     };
 
     const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        const user = auth?.user;
+
+        if (!user) return;
+
         event.preventDefault();
+        setIsSubmitting(true);
 
-        const newMemberData = { ...formData } as UserData;
+        const newMemberData = { ...formData } as MemberData;
 
-        upsertUser(user, newMemberData, async () => {
-            await getUserData(user, setUserData);
-            navigate(PROFILE_PATH, { replace: true });
-        });
+        upsertUser(user, newMemberData)
+            .then(() => auth?.updateMemberData(user))
+            .then(() => removeSessionItem(IS_NEW_USER))
+            .then(() => navigate(PROFILE_PATH));
     };
 
-    return (
-        <main className="min-h-screen w-screen bg-tas-800 text-white">
-            <div className="w-full max-w-lg mx-auto py-16 px-8">
-                <section className="">
-                    <h1 className="tas-heading-l font-semibold">
-                        <div className="tas-caption-l">แก้ไข</div>
-                        ข้อมูลส่วนตัว
-                    </h1>
-
-                    {isNewUser && (
-                        <div className={cx("mt-8 bg-blue-50 text-black rounded-md p-4 min-w-[6rem] font-heading")}>
-                            <h3 className="tas-body-large font-semibold">
-                                คุณใกล้จะเป็นสมาชิกแล้ว!
-                            </h3>
-                            <div className="tas-body-small mt-2">
-                                อีกขั้นตอนเดียวเท่านั้น! เพื่อให้ท่านได้รับการบริการที่ครบถ้วนและเพิ่มความปลอดภัย กรุณากรอกข้อมูลส่วนตัวของท่าน
-                            </div>
-                        </div>
-                    )}
-
-                    <form onSubmit={onFormSubmit}>
-                        <fieldset className="mt-8">
-                            {/* <legend className="tas-heading-m font-semibold">ข้อมูลส่วนตัว</legend> */}
-                            <Input
-                                classNames="w-full"
-                                label="ชื่อ"
-                                labelClasses="font-heading"
-                                inputClasses="border-white w-full text-black"
-                                inputProps={{
-                                    type: 'text',
-                                    name: 'firstName',
-                                    defaultValue: formData?.firstName,
-                                    required: true,
-                                    onChange: handleInputChange,
-                                }}
-                            />
-
-                            <Input
-                                classNames="mt-6 w-full"
-                                label="นามสกุล"
-                                labelClasses="font-heading"
-                                inputClasses="border-white w-full text-black"
-                                inputProps={{
-                                    type: 'text',
-                                    name: 'lastName',
-                                    defaultValue: formData?.lastName,
-                                    required: true,
-                                    onChange: handleInputChange,
-                                }}
-                            />
-                            <Input
-                                classNames="mt-6 w-full"
-                                label="อีเมล (ไม่บังคับ)"
-                                labelClasses="font-heading"
-                                inputClasses="border-white w-full text-black"
-                                inputProps={{
-                                    type: 'email',
-                                    name: 'email',
-                                    defaultValue: formData?.email,
-                                    onChange: handleInputChange,
-                                }}
-                            />
-                        </fieldset>
-
-                        <button
-                            className={cx('bg-tas-100 px-3 py-2 mt-6', 'tas-body text-white font-heading font-medium')}
-                            type="submit"
-                        >
-                            บันทึกข้อมูล
-                        </button>
-                    </form>
-                </section>
-                <section className="mt-16 text-sm text-white text-opacity-50 font-heading">
-                    <p className="">
-                        สมาคมดาราศาสตร์ไทยจะใช้ข้อมูลนี้เป็นการภายใน
-                        และไม่เปิดเผยข้อมูลส่วนบุคคลของท่านให้แก่บุคคลภายนอกหากไม่ได้รับความยินยอมของท่านโดยเด็ดขาด
-                    </p>
-                    <p className="mt-4">
-                        สำหรับรายละเอียดวัตถุประสงค์และการใช้ข้อมูลตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
-                        ท่านสามารถศึกษาได้จากหน้านโยบายความเป็นส่วนตัว
-                    </p>
-                </section>
+    const NewUserBanner = () => (
+        <div className={cx('mt-8 bg-blue-700 text-white rounded-md p-4 min-w-[6rem] font-heading')}>
+            <h3 className="tas-body-large font-semibold">เหลือแค่ขั้นตอนเดียวเท่านั้น!</h3>
+            <div className="tas-body-small mt-2">
+                เพื่อให้ท่านได้รับการบริการที่ครบถ้วนและเพิ่มความปลอดภัย กรุณากรอกข้อมูลส่วนตัวของท่าน
             </div>
-        </main>
+        </div>
+    );
+
+    return (
+        <>
+            <section className="">
+                <h1 className="tas-heading-l font-semibold">
+                    <div className="tas-caption-l">แก้ไข</div>
+                    ข้อมูลส่วนตัว
+                </h1>
+
+                {isNewUser && <NewUserBanner />}
+
+                <form onSubmit={onFormSubmit}>
+                    <fieldset className="mt-8">
+                        {/* <legend className="tas-heading-m font-semibold">ข้อมูลส่วนตัว</legend> */}
+                        <Input
+                            classNames="w-full"
+                            label="ชื่อ"
+                            labelClasses="font-heading"
+                            inputClasses="border-neutral-700 w-full text-black"
+                            inputProps={{
+                                type: 'text',
+                                name: 'firstName',
+                                defaultValue: formData?.firstName,
+                                placeholder: 'เอกภพ',
+                                required: true,
+                                onChange: handleInputChange,
+                            }}
+                        />
+
+                        <Input
+                            classNames="mt-6 w-full"
+                            label="นามสกุล"
+                            labelClasses="font-heading"
+                            inputClasses="border-neutral-500 w-full text-black"
+                            inputProps={{
+                                type: 'text',
+                                name: 'lastName',
+                                defaultValue: formData?.lastName,
+                                placeholder: 'ดาราวงศ์',
+                                required: true,
+                                onChange: handleInputChange,
+                            }}
+                        />
+                        <Input
+                            classNames="mt-6 w-full"
+                            label="อีเมล (ไม่บังคับ)"
+                            labelClasses="font-heading"
+                            inputClasses="border-neutral-500 w-full text-black"
+                            inputProps={{
+                                type: 'email',
+                                name: 'email',
+                                placeholder: 'ekkaphop.dara@astro.mail',
+                                defaultValue: formData?.email,
+                                onChange: handleInputChange,
+                            }}
+                        />
+                    </fieldset>
+
+                    <div className="mt-6 flex gap-2 font-heading tas-body">
+                        <button
+                            className={cx(
+                                isSubmitting ? 'bg-blue-300' : 'bg-tas-100 hover:bg-tas-300',
+                                'px-3 py-2',
+                                'text-white font-medium'
+                            )}
+                            type={isSubmitting ? 'button' : 'submit'}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'กำลังบันทึก' : 'บันทึกข้อมูล'}
+                        </button>
+                        {!isSubmitting && (
+                            <button
+                                className={cx('px-3 py-2', 'hover:bg-red-200', 'text-red-500 hover:text-red-700')}
+                                onClick={() => navigate(PROFILE_PATH)}
+                            >
+                                ยกเลิก
+                            </button>
+                        )}
+                    </div>
+                </form>
+            </section>
+            <section className="mt-8 text-sm text-neutral-500 text-opacity-50 font-heading">
+                <p className="">
+                    สมาคมดาราศาสตร์ไทยจะใช้ข้อมูลนี้เป็นการภายใน
+                    และไม่เปิดเผยข้อมูลส่วนบุคคลของท่านให้แก่บุคคลภายนอกหากไม่ได้รับความยินยอมของท่านโดยเด็ดขาด
+                </p>
+                <p className="mt-4">
+                    สำหรับรายละเอียดวัตถุประสงค์ และการใช้ข้อมูลตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562
+                    ท่านสามารถศึกษาได้จากหน้านโยบายความเป็นส่วนตัว
+                </p>
+            </section>
+        </>
     );
 };
 
