@@ -13,6 +13,19 @@ import { useAuth } from '../contexts/AuthContext';
 
 import Logo from '../assets/images/tas-logo.png';
 
+const CurrentTime = () => {
+    const [currentTime, setCurrentTime] = useState(new Date());
+        useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [])
+
+    return <small className='mt-2'>{currentTime.toLocaleString('en-gb')}</small>
+}
+
 const Profile = () => {
     const auth = useAuth();
 
@@ -30,7 +43,7 @@ const Profile = () => {
         QrCode.toDataURL(auth?.user?.uid, {
             errorCorrectionLevel: 'H',
             margin: 0,
-            width: 144,
+            width: 128,
             color: {
                 dark: '#001980',
                 light: '#0000',
@@ -83,8 +96,7 @@ const Profile = () => {
         return 'white';
     }
 
-
-    const flipCardSize = 'aspect-[1.616/1] w-full flex items-center justify-center shadow-md';
+    const flipCardSize = 'aspect-[1.616/1] w-full flex items-center justify-center shadow-md font-heading';
     const FlipCard = (
         <div className={cx('aspect-[1.616/1] mt-6')} onClick={() => setIsCardFlipped((p) => !p)}>
             <ReactCardFlip isFlipped={isCardFlipped}>
@@ -105,10 +117,11 @@ const Profile = () => {
                         />
                     )}
                     <img src={Logo} className="h-16" />
-                    <h3 className="mt-4 font-heading font-medium text-md text-white">สมาชิกสมาคมดาราศาสตร์ไทย</h3>
+                    <h3 className="mt-4 font-medium text-md text-white">สมาชิกสมาคมดาราศาสตร์ไทย</h3>
                 </div>
-                <div className={cx(flipCardSize, 'bg-neutral-100 rounded-md border-2 border-tas-500')}>
+                <div className={cx(flipCardSize, 'flex-col rounded-md border-2 border-tas-500')}>
                     <MyQrCode />
+                    <CurrentTime />
                 </div>
             </ReactCardFlip>
         </div>
@@ -139,10 +152,6 @@ const Profile = () => {
             </section>
             <section className="mt-8">
                 <h2 className="tas-heading-m font-semibold">บัตรสมาชิกของฉัน</h2>
-                {/* TODO: Make a nice card front and tap to show the QR Code */}
-                {/* <div className="mt-4 p-8 bg-tas-500 text-black rounded-md flex justify-center">
-                    <MyQrCode />
-                </div> */}
                 {FlipCard}
             </section>
         </>
