@@ -53,7 +53,7 @@ const App: React.FC = () => {
                         <Route element={<PrivateGuard />}>
                             <Route path={WELCOME_PATH} element={<Welcome />} />
                             <Route path={PROFILE_EDIT_PATH} element={<ProfileEdit />} />
-                            <Route path={PROFILE_PATH} element={<div>Dein Profil</div>} />
+                            <Route path={PROFILE_PATH} element={<Profile />} />
                             <Route path="inside" element={<div>inside</div>} />
                         </Route>
                     </Route>

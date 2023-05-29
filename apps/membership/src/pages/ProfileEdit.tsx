@@ -5,9 +5,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { MemberData, ProfileData } from '../types/UserData';
 import { upsertUser } from '../helpers/userData';
 import Input from '../components/Input';
-import { getSessionItem, removeSessionItem } from '../helpers/sessionStorage';
+import { getSessionItem } from '../helpers/sessionStorage';
 import { IS_NEW_USER } from '../constants/sessionStorage';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { PROFILE_PATH } from '../routes';
 
 const ProfileEdit = () => {
@@ -46,7 +46,6 @@ const ProfileEdit = () => {
 
         upsertUser(user, newMemberData)
             .then(() => auth?.updateMemberData(user))
-            .then(() => removeSessionItem(IS_NEW_USER))
             .then(() => navigate(PROFILE_PATH));
     };
 
