@@ -99,7 +99,7 @@ const Profile = () => {
 
     const flipCardSize = 'aspect-[1.616/1] w-full flex items-center justify-center shadow-md font-heading';
     const FlipCard = (
-        <div className={cx('aspect-[1.616/1] mt-6')} onClick={() => setIsCardFlipped((p) => !p)}>
+        <div className={cx('aspect-[1.616/1] mt-4')} onClick={() => setIsCardFlipped((p) => !p)}>
             <ReactCardFlip isFlipped={isCardFlipped}>
                 <div
                     className={cx(
