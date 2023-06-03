@@ -46,7 +46,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (!user) return Logger.info(ß('auth state changed to no user'));
+            if (!user) {
+                setIsLoading(false);
+                return Logger.info(ß('auth state changed to no user'));
+            }
 
             // Logger.info(ß('auth state changed'), user);
             Logger.info(ß('auth state changed'));
