@@ -44,7 +44,7 @@ const ProfileEdit = () => {
 
         const newMemberData = { ...formData } as MemberData;
 
-        upsertUser(user, newMemberData)
+        upsertUser(user.uid, newMemberData)
             .then(() => auth?.updateMemberData(user))
             .then(() => navigate(PROFILE_PATH));
     };

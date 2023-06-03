@@ -3,28 +3,29 @@ import React, { useContext, useEffect, useReducer, useState } from 'react';
 import cx from 'classnames';
 import QrCode from 'qrcode';
 import ReactCardFlip from 'react-card-flip';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
-import { ERROR_PATH } from '../routes';
+import { ADMIN_MEMBERS_PATH, ERROR_PATH } from '../routes';
 import { Logger } from '../utils/logger';
 import { getSessionItem, removeSessionItem } from '../helpers/sessionStorage';
 import { IS_NEW_USER } from '../constants/sessionStorage';
 import { useAuth } from '../contexts/AuthContext';
 
 import Logo from '../assets/images/tas-logo.png';
+import { format_TH_DDMMYYY } from '../helpers/date';
 
 const CurrentTime = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
-        useEffect(() => {
+    useEffect(() => {
         const interval = setInterval(() => {
             setCurrentTime(new Date());
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [])
+    }, []);
 
-    return <small className='mt-2'>{currentTime.toLocaleString('en-gb')}</small>
-}
+    return <small className="mt-2">{currentTime.toLocaleString('en-gb')}</small>;
+};
 
 const Profile = () => {
     const auth = useAuth();
@@ -94,7 +95,7 @@ const Profile = () => {
         if (points >= 50) return 'blue';
         if (points >= 20) return 'red';
         return 'white';
-    }
+    };
 
     const flipCardSize = 'aspect-[1.616/1] w-full flex items-center justify-center shadow-md font-heading';
     const FlipCard = (
@@ -141,19 +142,15 @@ const Profile = () => {
                         สมาชิกระดับ: <strong>ดาวฤกษ์</strong>
                     </div> */}
                 <Card title="แต้ม" content={points} />
-                <Card
-                    title="สมาชิกตั้งแต่"
-                    content={new Intl.DateTimeFormat('th-th', {
-                        day: 'numeric',
-                        month: 'narrow',
-                        year: '2-digit',
-                    }).format(new Date(auth?.user?.metadata.creationTime!))}
-                />
+                <Card title="สมาชิกตั้งแต่" content={format_TH_DDMMYYY(new Date(auth?.user?.metadata.creationTime!))} />
             </section>
             <section className="mt-8">
-                <h2 className="tas-heading-m font-semibold">บัตรสมาชิกของฉัน</h2>
+                <h2 className="tas-heading-m font-semibold">
+                    บัตรสมาชิกของฉัน &nbsp;
+                    {auth?.memberData?.isAdmin && <Link to={ADMIN_MEMBERS_PATH}>🪄</Link>}
+                </h2>
                 {FlipCard}
-            </section>
+            </section>{' '}
         </>
     );
 };

@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             points: [],
         };
 
-        return upsertUser(u, newUserData)
+        return upsertUser(u.uid, newUserData)
             .then(() => {
                 Logger.log(ß('user data has been inserted'));
                 setAsNewUser();
@@ -139,7 +139,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     // has to be function to hoist
     function updateMemberData(user: User) {
-        return getMemberData(user).then((data) => {
+        return getMemberData(user.uid).then((data) => {
             setMemberData(data);
             return data;
         });

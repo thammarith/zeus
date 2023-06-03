@@ -1,3 +1,9 @@
+import { Point } from "./Point";
+
+interface AuthData {
+    isAdmin?: boolean;
+}
+
 export interface CreationData {
     userId: string;
     phoneNumber: string;
@@ -10,16 +16,14 @@ export interface ProfileData {
     membershipId?: string;
 }
 
-interface Point {
+export interface MemberPoint extends Point {
     sourceId: string;
-    points: number;
-    basePoints: number;
-    multiplier: number;
-    date: Date;
+    awardedAt: Date;
+    awardedBy: string;
 }
 
-export interface MemberData extends ProfileData, CreationData {
-    points: Point[];
+export interface MemberData extends AuthData, ProfileData, CreationData {
+    points: MemberPoint[];
 }
 
 export default MemberData;

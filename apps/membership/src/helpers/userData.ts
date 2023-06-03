@@ -1,14 +1,28 @@
 import { User } from 'firebase/auth';
-import { doc, getDoc, getDocFromServer, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocFromServer, getDocs, setDoc } from 'firebase/firestore';
 import { firestore } from '../libs/firebase';
 import MemberData from '../types/UserData';
 import { Logger } from '../utils/logger';
 
 const ß = Logger.build('userData');
 
-export const getMemberData = (user: User): Promise<MemberData> => {
+export const getAllMemberDatas = (): Promise<MemberData[]> => {
+    Logger.log(ß('getting all the member datas'));
+
+    return getDocs(collection(firestore, 'users'))
+        .then((docData) => {
+            Logger.log(ß('received the data'));
+            return docData.docs.map((doc) => doc.data());
+        })
+        .catch((err) => {
+            Logger.error(ß('getAllMemberDatas cannot get the data'), err);
+            return err;
+        });
+};
+
+export const getMemberData = (uid: string): Promise<MemberData> => {
     Logger.log(ß('getting the user data'));
-    const docRef = doc(firestore, 'users', user.uid);
+    const docRef = doc(firestore, 'users', uid);
 
     return getDoc(docRef)
         .then((docData) => {
@@ -21,8 +35,8 @@ export const getMemberData = (user: User): Promise<MemberData> => {
         });
 };
 
-export const upsertUser = (user: User, userData: MemberData) => {
-    const userRef = doc(firestore, 'users', user.uid);
+export const upsertUser = (uid: string, userData: MemberData) => {
+    const userRef = doc(firestore, 'users', uid);
 
     const upsertingData = {
         ...userData,
